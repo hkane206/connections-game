@@ -1,0 +1,36 @@
+.tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    background-color: #f9f9f9;
+    font-size: 18px;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+  }
+  
+  .tile.selected {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .tile.merged {
+    background-color: #28a745;
+    color: white;
+    grid-column: span 4; /* Make merged tiles span the entire width of the grid */
+    grid-row: span 1; /* Ensure merged tiles span only 1 row */
+  }
+  
+  .merged-header {
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  .merged-words {
+    font-size: 14px;
+    text-align: center;
+  }
+  
