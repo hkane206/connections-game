@@ -1,68 +1,53 @@
 .tile {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    border: none !important; /* Remove the border */
-    border-radius: 8px !important;
-    cursor: pointer !important;
-    background-color: #F0F0D8 !important; /* Light background for unselected tile */
-    font-size: 20px !important; /* Make the text smaller */
-    font-weight: bold !important;
-    color: #000000 !important; /* Black text for unselected tile */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important; /* Subtle shadow for depth */
-    width: 140px !important; /* Fixed width */
-    height: 70px !important; /* Fixed height */
-    box-sizing: border-box !important;
-    padding: 0 10px !important; /* Add padding on the left and right sides */
-    text-align: center !important; /* Center the text */
-    overflow: hidden !important; /* Ensure that text doesn't overflow */
-    text-overflow: ellipsis !important; /* Add ellipsis if the text overflows */
-    white-space: nowrap !important; /* Ensure the text stays on one line */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none; /* Remove the border */
+    border-radius: 8px;
+    cursor: pointer;
+    background-color: #f6f6da; /* Light background for unselected tile */
+    color: #000000; /* Black text for unselected tile */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    box-sizing: border-box;
+    padding: 0 10px; /* Add padding on the left and right sides */
+    text-align: center; /* Center the text */
+    overflow: hidden; /* Ensure that text doesn't overflow */
+    text-overflow: ellipsis; /* Add ellipsis if the text overflows */
+    white-space: nowrap; /* Ensure the text stays on one line */
 }
 
 .tile.selected {
-    background-color: #59594B !important; /* Dark background for selected tile */
-    color: #FFFFFF !important; /* White text for selected tile */
+    background-color: #59594B; /* Dark background for selected tile */
+    color: #FFFFFF; /* White text for selected tile */
 }
 
 .tile.merged {
-    background-color: inherit !important; /* Background color will depend on level */
-    color: white !important;
-    grid-column: span 4 !important; /* Spanning entire width if merged */
-    grid-row: span 1 !important; /* Ensure it spans only 1 row */
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: center !important;
-    align-items: center !important;
-}
-
-.game-board .grid {
-    display: grid !important;
-    grid-template-columns: repeat(4, 1fr) !important; /* Adjust to 4 columns */
-    grid-gap: 10px !important;
-    justify-content: center !important;
-    margin: 20px auto !important;
-    max-width: 600px !important; /* Adjust max-width */
+    color: white;
+    grid-column: span 4; /* Spanning entire width if merged */
+    grid-row: span 1; /* Ensure it spans only 1 row */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 button.game-item {
-    background: transparent !important;
-    border: none !important;
-    font: inherit !important;
-    color: inherit !important;
-    padding: 0 !important;
-    cursor: pointer !important;
-    width: 100% !important; /* Ensure button takes up full width of tile */
-    height: 100% !important; /* Ensure button takes up full height of tile */
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+    border: none;
+    font: inherit;
+    color: inherit;
+    padding: 0;
+    cursor: pointer;
+    width: 100%; /* Ensure button takes up full width of tile */
+    height: 100%; /* Ensure button takes up full height of tile */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 button.game-item:focus {
-    outline: none !important;
+    outline: none;
 }
 
 button.game-item:hover {
-    background-color: rgba(0, 0, 0, 0.1) !important; /* Subtle hover effect */
+    background-color: rgba(0, 0, 0, 0.1); /* Subtle hover effect */
 }

@@ -3,22 +3,25 @@ import './Tile.css';
 
 function Tile({ word, onClick, isSelected, isMerged, mergedData, color }) {
   const tileStyle = isMerged ? { backgroundColor: color } : {};
+  console.log('Tile:', word, 'isMerged:', isMerged, 'Color:', color);
 
   return (
-    <div
-      className={`tile ${isSelected ? 'selected' : ''} ${isMerged ? 'merged' : ''}`}
+    <button
+      className={`tile game-item ${isSelected ? 'selected' : ''} ${isMerged ? 'merged' : ''}`}
       onClick={!isMerged ? onClick : null}
       style={tileStyle}
     >
       {isMerged ? (
         <>
           <div className="merged-header">{mergedData.theme}</div>
-          <div className="merged-words">{mergedData.words.join(', ')}</div>
+          <div className="merged-words">
+            {Array.isArray(mergedData.words) ? mergedData.words.join(', ') : ''}
+          </div>
         </>
       ) : (
         word
       )}
-    </div>
+    </button>
   );
 }
 

@@ -17,14 +17,14 @@ function getRandomPuzzle(puzzles) {
 }
 
 function getTileColor(level) {
-    switch(level) {
-      case 0: return '#F7E29C'; // Yellow
-      case 1: return '#A8D08D'; // Green
-      case 2: return '#BDD7EE'; // Blue
-      case 3: return '#D5A6BD'; // Purple
-      default: return 'gray'; // Fallback color
-    }
-  }  
+  switch(level) {
+    case 0: return '#F7E29C'; // Yellow
+    case 1: return '#A8D08D'; // Green
+    case 2: return '#BDD7EE'; // Blue
+    case 3: return '#D5A6BD'; // Purple
+    default: return 'gray'; // Fallback color
+  }
+}
 
 function GameBoard() {
   const [selectedTiles, setSelectedTiles] = useState([]);
@@ -33,6 +33,8 @@ function GameBoard() {
   const [mistakesArray, setMistakesArray] = useState([false, false, false, false]);
   const [message, setMessage] = useState('');
   const [gameOver, setGameOver] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState('');
   const [selectedPuzzle, setSelectedPuzzle] = useState(null);
 
   useEffect(() => {
@@ -89,6 +91,13 @@ function GameBoard() {
       setMergedTiles([...mergedTiles, ...newMergedTiles]);
       setSelectedTiles(selectedTiles.filter(tile => !newMergedTiles.flatMap(mt => mt.words).includes(tile.word)));
       setMessage('');
+
+      // Check if the player has won
+      if (mergedTiles.length + newMergedTiles.length === selectedPuzzle.answers.length) {
+        setGameOver(true);
+        setPopupMessage('Congratulations! You won the game!');
+        setShowPopup(true);
+      }
     } else {
       // Set message
       if (oneAway) {
@@ -109,7 +118,17 @@ function GameBoard() {
         // Check if all mistakes have been used
         if (firstFalseIndex === mistakesArray.length - 1) {
           setGameOver(true); // Trigger game over
-          setMessage('Game Over! You have used all your mistakes.');
+
+          // Show all the correct groups
+          const finalMergedTiles = selectedPuzzle.answers.map(answer => ({
+            theme: answer.group,
+            words: answer.members,
+            color: getTileColor(answer.level),
+          }));
+          setMergedTiles(finalMergedTiles);
+
+          setPopupMessage('Game Over! You have used all your mistakes.');
+          setShowPopup(true);
         }
       }
     }
@@ -161,7 +180,16 @@ function GameBoard() {
       <button onClick={() => setTiles(shuffleArray([...tiles]))} disabled={gameOver}>Shuffle</button>
 
       {message && <div className="message">{message}</div>}
-      {mergedTiles.length === (selectedPuzzle?.answers.length || 0) && <h2>You Win!</h2>}
+
+      {/* Popup Message */}
+      {showPopup && (
+        <div className="popup">
+          <div className="popup-content">
+            <p>{popupMessage}</p>
+            <button onClick={() => window.location.reload()}>Play Again</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
