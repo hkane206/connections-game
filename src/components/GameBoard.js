@@ -88,7 +88,18 @@ function GameBoard() {
     });
 
     if (matchFound) {
-      setMergedTiles([...mergedTiles, ...newMergedTiles]);
+      setMergedTiles(prevMergedTiles => {
+        const combinedMergedTiles = [...prevMergedTiles, ...newMergedTiles];
+        
+        // Error handling to ensure no more than 16 tiles
+        if (combinedMergedTiles.length + tiles.length <= 16) {
+          return combinedMergedTiles;
+        } else {
+          console.error("Too many tiles on the board!");
+          return prevMergedTiles;
+        }
+      });
+
       setSelectedTiles(selectedTiles.filter(tile => !newMergedTiles.flatMap(mt => mt.words).includes(tile.word)));
       setMessage('');
 
@@ -97,6 +108,8 @@ function GameBoard() {
         setGameOver(true);
         setPopupMessage('Congratulations! You won the game!');
         setShowPopup(true);
+        setTiles([]); // Clear remaining tiles
+        setMessage(''); // Clear the message when game is over
       }
     } else {
       // Set message
@@ -125,10 +138,12 @@ function GameBoard() {
             words: answer.members,
             color: getTileColor(answer.level),
           }));
+
           setMergedTiles(finalMergedTiles);
 
           setPopupMessage('Game Over! You have used all your mistakes.');
           setShowPopup(true);
+          setMessage(''); // Clear the message when game is over
         }
       }
     }
@@ -155,7 +170,7 @@ function GameBoard() {
             }}
           />
         ))}
-        {tiles.map((tile, index) => (
+        {tiles.length + mergedTiles.length <= 16 && tiles.map((tile, index) => (
           <Tile
             key={index}
             word={tile.word}
@@ -167,28 +182,31 @@ function GameBoard() {
         ))}
       </div>
 
-      {/* Mistakes remaining */}
       <div className="mistakes-remaining">
         {mistakesArray.map((mistake, index) => (
           <span key={index} className={mistake ? 'mistake-used' : ''}></span>
         ))}
       </div>
 
-      {/* Buttons */}
       <button onClick={checkForMatch} disabled={gameOver}>Submit</button>
       <button onClick={() => setSelectedTiles([])} disabled={gameOver}>Deselect all</button>
       <button onClick={() => setTiles(shuffleArray([...tiles]))} disabled={gameOver}>Shuffle</button>
 
       {message && <div className="message">{message}</div>}
 
-      {/* Popup Message */}
       {showPopup && (
         <div className="popup">
           <div className="popup-content">
             <p>{popupMessage}</p>
-            <button onClick={() => window.location.reload()}>Play Again</button>
+            <button onClick={() => setShowPopup(false)}>Close</button>
           </div>
         </div>
+      )}
+
+      {gameOver && (
+        <button className="play-again-button" onClick={() => window.location.reload()}>
+          Play Again
+        </button>
       )}
     </div>
   );

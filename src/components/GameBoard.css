@@ -79,7 +79,6 @@
 .mistakes-remaining span.mistake-used {
     background-color: #e0e0e0; /* Light color for used mistakes */
 }
-
 /* Popup styles */
 .popup {
     position: fixed;
@@ -119,4 +118,20 @@
 
 .popup-content button:hover {
     background-color: #0056b3;
+}
+
+.play-again-button {
+    margin-top: 20px;
+    background-color: #333;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.play-again-button:hover {
+    background-color: #555;
 }
