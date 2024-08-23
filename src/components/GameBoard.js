@@ -1,26 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Tile from './Tile';
 import './GameBoard.css';
-
-const categories = ['Category 1', 'Category 2', 'Category 3', 'Category 4'];
-const initialTiles = [
-  { word: 'Apple', category: categories[0] },
-  { word: 'Orange', category: categories[0] },
-  { word: 'Banana', category: categories[0] },
-  { word: 'Grape', category: categories[0] },
-  { word: 'Dog', category: categories[1] },
-  { word: 'Cat', category: categories[1] },
-  { word: 'Fish', category: categories[1] },
-  { word: 'Bird', category: categories[1] },
-  { word: 'Car', category: categories[2] },
-  { word: 'Bike', category: categories[2] },
-  { word: 'Plane', category: categories[2] },
-  { word: 'Boat', category: categories[2] },
-  { word: 'Red', category: categories[3] },
-  { word: 'Blue', category: categories[3] },
-  { word: 'Green', category: categories[3] },
-  { word: 'Yellow', category: categories[3] },
-];
+import puzzles from '../data/puzzles.json'; // Import the JSON file
 
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
@@ -30,6 +11,11 @@ function shuffleArray(array) {
   return array;
 }
 
+function getRandomPuzzle(puzzles) {
+  const randomIndex = Math.floor(Math.random() * puzzles.length);
+  return puzzles[randomIndex];
+}
+
 function GameBoard() {
   const [selectedTiles, setSelectedTiles] = useState([]);
   const [mergedTiles, setMergedTiles] = useState([]);
@@ -37,9 +23,18 @@ function GameBoard() {
   const [mistakesArray, setMistakesArray] = useState([false, false, false, false]);
   const [message, setMessage] = useState('');
   const [gameOver, setGameOver] = useState(false);
+  const [selectedPuzzle, setSelectedPuzzle] = useState(null);
 
   useEffect(() => {
-    setTiles(shuffleArray([...initialTiles])); // Shuffle and set the tiles when the component mounts
+    const puzzle = getRandomPuzzle(puzzles);
+    setSelectedPuzzle(puzzle);
+
+    // Flatten all the members into a list of tiles with their category
+    const initialTiles = puzzle.answers.flatMap((answer, index) => 
+      answer.members.map(member => ({ word: member, category: answer.group }))
+    );
+
+    setTiles(shuffleArray(initialTiles)); // Shuffle and set the tiles when the component mounts
   }, []);
 
   const handleTileClick = (tile) => {
@@ -58,9 +53,9 @@ function GameBoard() {
   const checkForMatch = () => {
     if (gameOver) return; // Disable checking for match if game is over
 
-    const categoryGroups = categories.map(cat => (
-      selectedTiles.filter(tile => tile.category === cat)
-    ));
+    const categoryGroups = selectedPuzzle.answers.map(answer => 
+      selectedTiles.filter(tile => tile.category === answer.group)
+    );
 
     let matchFound = false;
     const newMergedTiles = [];
@@ -84,11 +79,10 @@ function GameBoard() {
       setSelectedTiles(selectedTiles.filter(tile => !newMergedTiles.flatMap(mt => mt.words).includes(tile.word)));
       setMessage('');
     } else {
-      //Set message
+      // Set message
       if (oneAway) {
         setMessage("You're one away!");
-      } 
-      else {
+      } else {
         setMessage('Incorrect selection. Please try again.');
       }
     
@@ -155,7 +149,7 @@ function GameBoard() {
       <button onClick={() => setTiles(shuffleArray([...tiles]))} disabled={gameOver}>Shuffle</button>
 
       {message && <div className="message">{message}</div>}
-      {mergedTiles.length === categories.length && <h2>You Win!</h2>}
+      {mergedTiles.length === (selectedPuzzle?.answers.length || 0) && <h2>You Win!</h2>}
     </div>
   );
 }
