@@ -2,6 +2,13 @@ import React, { useState, useEffect } from 'react';
 import Tile from './Tile';
 import './GameBoard.css';
 import puzzles from '../data/puzzles.json'; // Adjust the path as needed
+import { Configuration, OpenAIApi } from 'openai';
+
+// OpenAI Configuration
+const configuration = new Configuration({
+  apiKey: process.env.REACT_APP_OPENAI_API_KEY, // Make sure to set this in your .env file
+});
+const openai = new OpenAIApi(configuration);
 
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
@@ -62,90 +69,51 @@ function GameBoard() {
   const isTileSelected = (tile) => selectedTiles.includes(tile);
   const isTileMerged = (tile) => mergedTiles.some(mt => mt.words.includes(tile.word));
 
-  const checkForMatch = () => {
-    if (gameOver) return; // Disable checking for match if game is over
-
-    const categoryGroups = selectedPuzzle.answers.map(answer => 
-      selectedTiles.filter(tile => tile.category === answer.group)
-    );
-
-    let matchFound = false;
-    const newMergedTiles = [];
-    let oneAway = false;
-
-    categoryGroups.forEach(group => {
-      if (group.length === 4) {
-        newMergedTiles.push({
-          theme: group[0].category,
-          words: group.map(tile => tile.word),
-          color: getTileColor(group[0].level) // Assign color based on level
-        });
-        setTiles(tiles.filter(tile => !group.includes(tile)));
-        matchFound = true;
-      } else if (group.length === 3 && selectedTiles.length === 4) {
-        oneAway = true;
-      }
-    });
-
-    if (matchFound) {
-      setMergedTiles(prevMergedTiles => {
-        const combinedMergedTiles = [...prevMergedTiles, ...newMergedTiles];
-        
-        // Error handling to ensure no more than 16 tiles
-        if (combinedMergedTiles.length + tiles.length <= 16) {
-          return combinedMergedTiles;
-        } else {
-          console.error("Too many tiles on the board!");
-          return prevMergedTiles;
-        }
+  const generateThemeWithOpenAI = async (selectedWords) => {
+    try {
+      const response = await openai.createCompletion({
+        model: "text-davinci-003",
+        prompt: `Create a theme or category that can connect these words: ${selectedWords.join(', ')}.`,
+        max_tokens: 50,
       });
 
-      setSelectedTiles(selectedTiles.filter(tile => !newMergedTiles.flatMap(mt => mt.words).includes(tile.word)));
-      setMessage('');
+      const theme = response.data.choices[0].text.trim();
+      return theme || 'Random Theme'; // Fallback to 'Random Theme' if OpenAI doesn't return a theme
+    } catch (error) {
+      console.error("Error generating theme with OpenAI:", error);
+      return 'Random Theme'; // Fallback in case of error
+    }
+  };
 
-      // Check if the player has won
-      if (mergedTiles.length + newMergedTiles.length === selectedPuzzle.answers.length) {
-        setGameOver(true);
-        setPopupMessage('Congratulations! You won the game!');
-        setShowPopup(true);
-        setTiles([]); // Clear remaining tiles
-        setMessage(''); // Clear the message when game is over
-      }
-    } else {
-      // Set message
-      if (oneAway) {
-        setMessage("You're one away!");
-      } else {
-        setMessage('Incorrect selection. Please try again.');
-      }
-    
-      setSelectedTiles([]);
+  const checkForMatch = async () => {
+    if (gameOver) return; // Disable checking for match if game is over
 
-      // Update mistakesArray only if not one away
-      const firstFalseIndex = mistakesArray.indexOf(false);
-      if (firstFalseIndex !== -1) {
-        const updatedMistakesArray = [...mistakesArray];
-        updatedMistakesArray[firstFalseIndex] = true;
-        setMistakesArray(updatedMistakesArray);
+    if (selectedTiles.length !== 4) {
+      setMessage('Please select 4 tiles to submit.');
+      return;
+    }
 
-        // Check if all mistakes have been used
-        if (firstFalseIndex === mistakesArray.length - 1) {
-          setGameOver(true); // Trigger game over
+    // Generate a theme using OpenAI for the selected tiles
+    const theme = await generateThemeWithOpenAI(selectedTiles.map(tile => tile.word));
 
-          // Show all the correct groups
-          const finalMergedTiles = selectedPuzzle.answers.map(answer => ({
-            theme: answer.group,
-            words: answer.members,
-            color: getTileColor(answer.level),
-          }));
+    // Create a new merged tile with the generated theme
+    const newMergedTile = {
+      theme: theme,
+      words: selectedTiles.map(tile => tile.word),
+      color: getTileColor(mergedTiles.length), // Assign a new color
+    };
 
-          setMergedTiles(finalMergedTiles);
+    setMergedTiles([...mergedTiles, newMergedTile]);
+    setTiles(tiles.filter(tile => !selectedTiles.includes(tile)));
+    setSelectedTiles([]);
+    setMessage('');
 
-          setPopupMessage('Game Over! You have used all your mistakes.');
-          setShowPopup(true);
-          setMessage(''); // Clear the message when game is over
-        }
-      }
+    // Check if the player has won
+    if (mergedTiles.length + 1 === 4) {
+      setGameOver(true);
+      setPopupMessage('Congratulations! You won the game!');
+      setShowPopup(true);
+      setTiles([]); // Clear remaining tiles
     }
   };
 
