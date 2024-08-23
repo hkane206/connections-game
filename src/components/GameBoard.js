@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Tile from './Tile';
 import './GameBoard.css';
-import puzzles from '../data/puzzles.json'; // Import the JSON file
+import puzzles from '../data/puzzles.json'; // Adjust the path as needed
 
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
@@ -16,6 +16,16 @@ function getRandomPuzzle(puzzles) {
   return puzzles[randomIndex];
 }
 
+function getTileColor(level) {
+    switch(level) {
+      case 0: return '#F7E29C'; // Yellow
+      case 1: return '#A8D08D'; // Green
+      case 2: return '#BDD7EE'; // Blue
+      case 3: return '#D5A6BD'; // Purple
+      default: return 'gray'; // Fallback color
+    }
+  }  
+
 function GameBoard() {
   const [selectedTiles, setSelectedTiles] = useState([]);
   const [mergedTiles, setMergedTiles] = useState([]);
@@ -29,9 +39,9 @@ function GameBoard() {
     const puzzle = getRandomPuzzle(puzzles);
     setSelectedPuzzle(puzzle);
 
-    // Flatten all the members into a list of tiles with their category
-    const initialTiles = puzzle.answers.flatMap((answer, index) => 
-      answer.members.map(member => ({ word: member, category: answer.group }))
+    // Flatten all the members into a list of tiles with their category and level
+    const initialTiles = puzzle.answers.flatMap(answer => 
+      answer.members.map(member => ({ word: member, category: answer.group, level: answer.level }))
     );
 
     setTiles(shuffleArray(initialTiles)); // Shuffle and set the tiles when the component mounts
@@ -66,6 +76,7 @@ function GameBoard() {
         newMergedTiles.push({
           theme: group[0].category,
           words: group.map(tile => tile.word),
+          color: getTileColor(group[0].level) // Assign color based on level
         });
         setTiles(tiles.filter(tile => !group.includes(tile)));
         matchFound = true;
@@ -118,6 +129,7 @@ function GameBoard() {
             key={`merged-${index}`}
             word=""
             isMerged
+            color={mt.color} // Pass color prop to Tile
             mergedData={{
               theme: mt.theme,
               words: mt.words,
