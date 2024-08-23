@@ -1,6 +1,7 @@
 .game-board {
     text-align: center;
     padding: 20px;
+    font-family: 'Arial', sans-serif;
   }
   
   .grid {
@@ -9,17 +10,27 @@
     grid-gap: 10px;
     justify-content: center;
     margin: 20px auto;
-    max-width: 640px; /* Adjust max-width to fit larger tiles */
+    max-width: 500px; /* Adjust max-width to fit larger tiles */
   }
   
   button {
     margin-top: 20px;
     padding: 10px 20px;
     font-size: 16px;
+    border: 2px solid #333; /* Border similar to the buttons */
+    background-color: white; /* Button background */
+    color: #333; /* Button text color */
+    border-radius: 20px; /* Rounded corners */
+    cursor: pointer;
   }
   
+  button:hover {
+    background-color: #f0f0f0;
+  }
+
   h1 {
     margin-bottom: 20px;
+    font-size: 24px;
   }
   
   h2 {
@@ -77,3 +88,22 @@
     text-align: center;
   }
   
+  .mistakes-remaining {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.mistakes-remaining span {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    background-color: #333; /* Dark color for remaining mistakes */
+    border-radius: 50%;
+    margin: 0 5px;
+}
+
+.mistakes-remaining span.mistake-used {
+    background-color: #e0e0e0; /* Light color for used mistakes */
+}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Tile from './Tile';
 import './GameBoard.css';
 
@@ -22,13 +22,29 @@ const initialTiles = [
   { word: 'Yellow', category: categories[3] },
 ];
 
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
 function GameBoard() {
   const [selectedTiles, setSelectedTiles] = useState([]);
   const [mergedTiles, setMergedTiles] = useState([]);
-  const [tiles, setTiles] = useState(initialTiles);
+  const [tiles, setTiles] = useState([]);
+  const [mistakesArray, setMistakesArray] = useState([false, false, false, false]);
   const [message, setMessage] = useState('');
+  const [gameOver, setGameOver] = useState(false);
+
+  useEffect(() => {
+    setTiles(shuffleArray([...initialTiles])); // Shuffle and set the tiles when the component mounts
+  }, []);
 
   const handleTileClick = (tile) => {
+    if (gameOver) return; // Disable clicking if game is over
+
     if (selectedTiles.includes(tile)) {
       setSelectedTiles(selectedTiles.filter(t => t !== tile));
     } else {
@@ -40,12 +56,15 @@ function GameBoard() {
   const isTileMerged = (tile) => mergedTiles.some(mt => mt.words.includes(tile.word));
 
   const checkForMatch = () => {
+    if (gameOver) return; // Disable checking for match if game is over
+
     const categoryGroups = categories.map(cat => (
       selectedTiles.filter(tile => tile.category === cat)
     ));
 
     let matchFound = false;
     const newMergedTiles = [];
+    let oneAway = false;
 
     categoryGroups.forEach(group => {
       if (group.length === 4) {
@@ -55,6 +74,8 @@ function GameBoard() {
         });
         setTiles(tiles.filter(tile => !group.includes(tile)));
         matchFound = true;
+      } else if (group.length === 3 && selectedTiles.length === 4) {
+        oneAway = true;
       }
     });
 
@@ -63,20 +84,29 @@ function GameBoard() {
       setSelectedTiles(selectedTiles.filter(tile => !newMergedTiles.flatMap(mt => mt.words).includes(tile.word)));
       setMessage('');
     } else {
+      //Set message
+      if (oneAway) {
+        setMessage("You're one away!");
+      } 
+      else {
+        setMessage('Incorrect selection. Please try again.');
+      }
+    
       setSelectedTiles([]);
-      
-      // Check if the user is one tile away from completing a category
-      let oneAwayMessage = '';
-      categories.forEach(cat => {
-        const selectedInCategory = selectedTiles.filter(tile => tile.category === cat).length;
-        const remainingInCategory = tiles.filter(tile => tile.category === cat).length;
 
-        if (selectedInCategory === 3 && remainingInCategory === 1) {
-          oneAwayMessage = `You are one tile away from completing ${cat}!`;
+      // Update mistakesArray only if not one away
+      const firstFalseIndex = mistakesArray.indexOf(false);
+      if (firstFalseIndex !== -1) {
+        const updatedMistakesArray = [...mistakesArray];
+        updatedMistakesArray[firstFalseIndex] = true;
+        setMistakesArray(updatedMistakesArray);
+
+        // Check if all mistakes have been used
+        if (firstFalseIndex === mistakesArray.length - 1) {
+          setGameOver(true); // Trigger game over
+          setMessage('Game Over! You have used all your mistakes.');
         }
-      });
-
-      setMessage(oneAwayMessage || 'Incorrect selection. Please try again.');
+      }
     }
   };
 
@@ -111,7 +141,19 @@ function GameBoard() {
           />
         ))}
       </div>
-      <button onClick={checkForMatch}>Check for Match</button>
+
+      {/* Mistakes remaining */}
+      <div className="mistakes-remaining">
+        {mistakesArray.map((mistake, index) => (
+          <span key={index} className={mistake ? 'mistake-used' : ''}></span>
+        ))}
+      </div>
+
+      {/* Buttons */}
+      <button onClick={checkForMatch} disabled={gameOver}>Submit</button>
+      <button onClick={() => setSelectedTiles([])} disabled={gameOver}>Deselect all</button>
+      <button onClick={() => setTiles(shuffleArray([...tiles]))} disabled={gameOver}>Shuffle</button>
+
       {message && <div className="message">{message}</div>}
       {mergedTiles.length === categories.length && <h2>You Win!</h2>}
     </div>
