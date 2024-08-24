@@ -2,13 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Tile from './Tile';
 import './GameBoard.css';
 import puzzles from '../data/puzzles.json'; // Adjust the path as needed
-import { Configuration, OpenAIApi } from 'openai';
-
-// OpenAI Configuration
-const configuration = new Configuration({
-  apiKey: process.env.REACT_APP_OPENAI_API_KEY, // Make sure to set this in your .env file
-});
-const openai = new OpenAIApi(configuration);
 
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
@@ -69,21 +62,23 @@ function GameBoard() {
   const isTileSelected = (tile) => selectedTiles.includes(tile);
   const isTileMerged = (tile) => mergedTiles.some(mt => mt.words.includes(tile.word));
 
-  const generateThemeWithOpenAI = async (selectedWords) => {
+  async function generateThemeWithGemini(selectedWords) {
     try {
-      const response = await openai.createCompletion({
-        model: "text-davinci-003",
-        prompt: `Create a theme or category that can connect these words: ${selectedWords.join(', ')}.`,
-        max_tokens: 50,
-      });
+        const response = await fetch('http://localhost:5001/api/get-theme', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ selectedWords })
+        });
 
-      const theme = response.data.choices[0].text.trim();
-      return theme || 'Random Theme'; // Fallback to 'Random Theme' if OpenAI doesn't return a theme
+        const data = await response.json();
+        return data.theme;
     } catch (error) {
-      console.error("Error generating theme with OpenAI:", error);
-      return 'Random Theme'; // Fallback in case of error
+        console.error('Error fetching theme:', error);
+        return 'Random Theme';
     }
-  };
+  }
 
   const checkForMatch = async () => {
     if (gameOver) return; // Disable checking for match if game is over
@@ -93,8 +88,8 @@ function GameBoard() {
       return;
     }
 
-    // Generate a theme using OpenAI for the selected tiles
-    const theme = await generateThemeWithOpenAI(selectedTiles.map(tile => tile.word));
+    // Generate a theme using Gemini for the selected tiles
+    const theme = await generateThemeWithGemini(selectedTiles.map(tile => tile.word));
 
     // Create a new merged tile with the generated theme
     const newMergedTile = {

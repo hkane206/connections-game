@@ -3,7 +3,6 @@ import './Tile.css';
 
 function Tile({ word, onClick, isSelected, isMerged, mergedData, color }) {
   const tileStyle = isMerged ? { backgroundColor: color } : {};
-  console.log('Tile:', word, 'isMerged:', isMerged, 'Color:', color);
 
   return (
     <button

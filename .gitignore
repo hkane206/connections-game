@@ -4,6 +4,8 @@
 /node_modules
 /.pnp
 .pnp.js
+google-cloud-sdk/
+/backend/node_modules/
 
 # testing
 /coverage
