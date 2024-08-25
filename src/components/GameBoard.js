@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Tile from './Tile';
+import LoadingSpinner from './LoadingSpinner';
 import './GameBoard.css';
 import puzzles from '../data/puzzles.json'; // Adjust the path as needed
 
@@ -49,6 +50,7 @@ function GameBoard() {
   const [showPopup, setShowPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
   const [selectedPuzzle, setSelectedPuzzle] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const puzzle = getRandomPuzzle(puzzles);
@@ -101,6 +103,8 @@ function GameBoard() {
       return;
     }
 
+    setIsLoading(true);
+
     // Check if the selected tiles match any original group
     const originalTheme = checkIfOriginalGroup(selectedTiles, selectedPuzzle);
 
@@ -124,6 +128,7 @@ function GameBoard() {
     setTiles(tiles.filter(tile => !selectedTiles.includes(tile)));
     setSelectedTiles([]);
     setMessage('');
+    setIsLoading(false);
 
     // Check if the player has won
     if (mergedTiles.length + 1 === 4) {
@@ -193,6 +198,8 @@ function GameBoard() {
           Play Again
         </button>
       )}
+
+      {isLoading && <LoadingSpinner />} {/* Conditionally render the loading spinner */}
     </div>
   );
 }
