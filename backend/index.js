@@ -21,37 +21,47 @@ const model = 'gemini-1.5-flash-001';
 const generativeModel = vertex_ai.preview.getGenerativeModel({
   model: model,
   generationConfig: {
-    'maxOutputTokens': 8192,
+    'maxOutputTokens': 2048,
     'temperature': 1,
     'topP': 0.95,
   }
 });
-
-
 async function generateResponse(selectedWords) {
-  const req = {
-    contents: [
-      {role: 'user', parts: [{text: `Generate a theme or category that can connect these four words: ${selectedWords.join(', ')}. Only tell me the theme with no explanation.`}]}
-    ],
-  };
-
-  try {
-    const streamingResp = await generativeModel.generateContentStream(req);
-
-    let finalContent = '';
-
-    for await (const item of streamingResp.stream) {
-        if (item.candidates && item.candidates.length > 0) {
-          // Directly access the theme text from the JSON structure
-          theme = item.candidates[0].content.parts[0].text.trim(); // Trim to remove any extra whitespace
-          break; // Exit loop after first theme is found
+    const req = {
+      contents: [
+        {
+          role: 'user',
+          parts: [
+            {
+              text: `I'm playing a game where I need to find a common theme or category that links ${selectedWords.join(', ')}. Think step-by-step and structure your response clearly. First, analyze each word individually. Then, explain how they connect. Finally, state the theme explicitly at the end in the format: "Theme: [theme_name]". Please do not use any special characters like asterisks or quotation marks around the theme name.`
+            }
+          ]
         }
+      ],
+    };
+  
+    try {
+      const streamingResp = await generativeModel.generateContentStream(req);
+  
+      let fullText = ''; // Initialize an empty string to collect all parts
+  
+      for await (const item of streamingResp.stream) {
+        if (item.candidates && item.candidates.length > 0) {
+          fullText += item.candidates[0].content.parts[0].text.trim(); // Append each part to the fullText
+        }
+      }
+  
+      // Now that fullText contains the entire response, extract the theme
+      const themeMatch = fullText.match(/Theme:\s*(.*)$/i);
+      let theme = themeMatch ? themeMatch[1].trim() : '';
+  
+      console.log(fullText);
+      return theme; // Return the extracted theme
+  
+    } catch (error) {
+      console.error('Error generating response:', error.response ? error.response.data : error.message);
     }
-    return theme;
-  } catch (error) {
-    console.error('Error generating response:', error.response ? error.response.data : error.message);
-  }
-}
+  }  
 
 // Endpoint to handle requests from the frontend
 app.post('/api/get-theme', async (req, res) => {
