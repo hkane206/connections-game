@@ -26,6 +26,19 @@ function getTileColor(level) {
   }
 }
 
+function checkIfOriginalGroup(selectedTiles, puzzle) {
+    const selectedWords = selectedTiles.map(tile => tile.word).sort();
+  
+    for (const answer of puzzle.answers) {
+      const originalGroupWords = answer.members.sort();
+      if (JSON.stringify(selectedWords) === JSON.stringify(originalGroupWords)) {
+        return answer.group; // Return the original theme if it matches
+      }
+    }
+  
+    return null; // Return null if no match is found
+  }  
+
 function GameBoard() {
   const [selectedTiles, setSelectedTiles] = useState([]);
   const [mergedTiles, setMergedTiles] = useState([]);
@@ -88,14 +101,23 @@ function GameBoard() {
       return;
     }
 
-    // Generate a theme using Gemini for the selected tiles
-    const theme = await generateThemeWithGemini(selectedTiles.map(tile => tile.word));
+    // Check if the selected tiles match any original group
+    const originalTheme = checkIfOriginalGroup(selectedTiles, selectedPuzzle);
 
-    // Create a new merged tile with the generated theme
+    let theme;
+    if (originalTheme) {
+        // Use the original theme from the puzzle file
+        theme = originalTheme;
+    } else {
+        // Generate a theme using Gemini for the selected tiles
+        theme = await generateThemeWithGemini(selectedTiles.map(tile => tile.word));
+    }
+
+    // Create a new merged tile with the theme
     const newMergedTile = {
-      theme: theme,
-      words: selectedTiles.map(tile => tile.word),
-      color: getTileColor(mergedTiles.length), // Assign a new color
+        theme: theme,
+        words: selectedTiles.map(tile => tile.word),
+        color: getTileColor(mergedTiles.length), // Assign a new color
     };
 
     setMergedTiles([...mergedTiles, newMergedTile]);

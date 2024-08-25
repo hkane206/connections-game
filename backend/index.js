@@ -51,10 +51,16 @@ async function generateResponse(selectedWords) {
         }
       }
   
-      // Now that fullText contains the entire response, extract the theme
-      const themeMatch = fullText.match(/Theme:\s*(.*)$/i);
-      let theme = themeMatch ? themeMatch[1].trim() : '';
-  
+      // Now that fullText contains the entire response, extract the last occurrence of the theme
+      const themeMatch = fullText.match(/Theme:\s*(.+?)(?=\n|$)/gi);
+      let theme = themeMatch ? themeMatch[themeMatch.length - 1] : '';
+
+      // Handle potential double "Theme:" prefix by removing any leading "Theme:" occurrences
+      theme = theme.replace(/(Theme:\s*)+/g, '').trim();
+
+      // Remove surrounding asterisks if present
+      theme = theme.replace(/^\**|\**$/g, '').trim();
+
       console.log(fullText);
       return theme; // Return the extracted theme
   
