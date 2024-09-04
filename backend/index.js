@@ -14,7 +14,7 @@ app.use(cors({
 app.use(bodyParser.json());
 
 // Initialize Vertex with your Cloud project and location
-const vertex_ai = new VertexAI({project: 'connections-433422', location: 'us-central1'});
+const vertex_ai = new VertexAI({project: process.env.PROJECT_ID, location: process.env.LOCATION});
 const model = 'gemini-1.5-flash-001';
 
 // Instantiate the models
