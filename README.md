@@ -102,23 +102,3 @@ The **cheating branch** introduces AI assistance to help players find connection
    - Enable the Natural Language API for your project.
 
    > **Note:** No API key is needed; just ensure that your Google Cloud project is properly set up with the required API enabled.
-
-## How to Contribute
-
-Contributions are welcome! If you have any ideas for new features or find any bugs, please open an issue or a pull request.
-
-### To contribute:
-
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature-branch`).
-3. Commit your changes (`git commit -m 'Add new feature'`).
-4. Push to the branch (`git push origin feature-branch`).
-5. Open a pull request.
-
-## License
-
-This project is licensed under the MIT License. See the `LICENSE` file for more details.
-
-## Acknowledgments
-
-Special thanks to [Eyefyre](https://github.com/Eyefyre) for providing the `Connections.json` file containing the New York Times' Connections answers and all contributors who have helped improve this game!
